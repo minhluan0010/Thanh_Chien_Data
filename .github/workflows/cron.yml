@@ -1,1 +1,43 @@
+name: Thu Thap Du Lieu Thanh Chien
 
+on:
+  workflow_dispatch: # Cho phép chạy thủ công
+  schedule:
+    # Chạy vào phút 59 mỗi giờ
+    # (Ví dụ: 09:59, 10:59, 11:59...)
+    - cron: '59 * * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Chạy trên máy chủ ảo Ubuntu
+
+    steps:
+      # Bước 1: Lấy mã nguồn (code) của bạn từ repo về
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Bước 2: Cài đặt môi trường Node.js (phiên bản 18)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm' # Lưu cache lại cho nhanh
+
+      # Bước 3: Cài đặt thư viện (chạy npm install)
+      - name: Install dependencies
+        run: npm install
+
+      # Bước 4: Chạy file script.js (đây là lúc gọi API)
+      - name: Run script
+        run: node script.js
+
+      # Bước 5: TỰ ĐỘNG LƯU THAY ĐỔI
+      # (Nếu file history.json có thay đổi, nó sẽ tự động commit)
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '🤖 Cập nhật tự động file history.json'
+          file_pattern: 'history.json'
+          commit_user_name: 'GitHub Action Bot'
+          commit_user_email: 'action-bot@github.com'
+          commit_author: 'GitHub Action Bot <action-bot@github.com>'
