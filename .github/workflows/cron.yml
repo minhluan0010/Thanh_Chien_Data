@@ -11,6 +11,12 @@ jobs:
   build:
     runs-on: ubuntu-latest # Chạy trên máy chủ ảo Ubuntu
 
+    # ===================================================
+    # THÊM 3 DÒNG NÀY VÀO ĐỂ CẤP QUYỀN
+    permissions:
+      contents: write
+    # ===================================================
+
     steps:
       # Bước 1: Lấy mã nguồn (code) của bạn từ repo về
       - name: Checkout repository
