@@ -138,32 +138,34 @@ async function updateResultsFromApi(storedHistory) {
  */
 async function addNewBattleRecord(storedHistory) {
     console.log("Đang gọi 3 API (Angel, Devil, Gems) để lấy dự báo trận mới...");
-    
-    // Gọi 3 API cùng lúc
-    const [angelData, devilData, gemsData] = await Promise.all([
-        fetchApi(API_ANGEL_URL),
-        fetchApi(API_DEVIL_URL),
-        fetchApi(API_GEMS_URL)
-    ]);
 
-    // Nếu 1 trong 3 API lỗi, dừng lại
-    if (!angelData || !devilData || !gemsData) {
-        console.error("Lỗi khi gọi 1 trong 3 API, không thể thêm bản ghi mới.");
-        return;
-    }
-
-    // 2. Xử lý dữ liệu (tính tổng)
-    const totalAngelScore = processContributionList(angelData).reduce((sum, item) => sum + item.score, 0);
-    const totalDevilScore = processContributionList(devilData).reduce((sum, item) => sum + item.score, 0);
+    // ... (phần gọi API giữ nguyên)
+    // ... (Đảm bảo bạn giữ lại phần gọi 3 API ở trên)
 
     // 3. Chuẩn bị dữ liệu để lưu (cho GIỜ TIẾP THEO)
-    const now = new Date();
-    const battleTime = new Date(now.getTime() + 3600 * 1000); // +1 giờ
-    battleTime.setMinutes(0, 0, 0); // Đặt về 00:00:00
 
-    const battleHour = battleTime.getHours();
-    const battleDate = `${String(battleTime.getDate()).padStart(2, '0')}/${String(battleTime.getMonth() + 1).padStart(2, '0')}`;
-    const ID_Battle = `${battleTime.getFullYear()}${String(battleTime.getMonth() + 1).padStart(2, '0')}${String(battleTime.getDate()).padStart(2, '0')}_${String(battleHour).padStart(2, '0')}`;
+    // --- BẮT ĐẦU SỬA MÚI GIỜ ---
+
+    // 1. Lấy giờ UTC hiện tại (ví dụ: 12:59 UTC)
+    const now = new Date();
+
+    // 2. Tạo đối tượng Date mới đã được điều chỉnh sang GMT+7
+    // (ví dụ: 12:59 UTC -> 19:59 GMT+7)
+    const battleTime = new Date(now.getTime() + (3600 * 1000 * 7)); // +7 giờ
+
+    // 3. Tính toán trận tiếp theo (ví dụ: 19:59 GMT+7 -> 20:00 GMT+7)
+    battleTime.setUTCHours(battleTime.getUTCHours() + 1); // +1 giờ
+    battleTime.setUTCMinutes(0, 0, 0); // Làm tròn 20:00:00
+
+    // 4. Lấy các thành phần GIỜ, NGÀY (theo giờ UTC, nhưng đã được điều chỉnh)
+    // Ví dụ: Lấy giờ của 20:00:00 (đã điều chỉnh)
+    const battleHour = battleTime.getUTCHours(); // Sẽ là 20
+    const battleDate = `${String(battleTime.getUTCDate()).padStart(2, '0')}/${String(battleTime.getUTCMonth() + 1).padStart(2, '0')}`;
+
+    // Tạo ID Trận (ví dụ: ..._20)
+    const ID_Battle = `${battleTime.getUTCFullYear()}${String(battleTime.getUTCMonth() + 1).padStart(2, '0')}${String(battleTime.getUTCDate()).padStart(2, '0')}_${String(battleHour).padStart(2, '0')}`;
+
+    // --- KẾT THÚC SỬA MÚI GIỜ ---
 
     // 4. Kiểm tra xem ID_Battle đã tồn tại chưa
     const existingRecord = storedHistory.find(rec => rec.ID_Battle === ID_Battle);
