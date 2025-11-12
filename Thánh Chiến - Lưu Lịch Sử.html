@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Thánh Chiến</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS để làm nổi bật Top 3 */
+        .top-1 {
+            background-color: #f18704 !important; /* Vàng nhạt (dùng !important để ghi đè) */
+            font-weight: 900; /* Đậm nhất */
+            color: #fff !important;
+        }
+        .top-2 {
+            background-color: #44b0ef !important; /* Bạc nhạt */
+            font-weight: 700; /* Đậm vừa */
+            color: #fff !important;
+        }
+        .top-3 {
+            background-color: #a8e799 !important; /* Đồng nhạt */
+            font-weight: 700; /* Đậm vừa */
+            color: #000000 !important;
+        }
+        /* Chiều cao tối đa cho các bảng */
+        .table-container {
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+		.linhthach {
+			color: #0087ff;
+			font-weight: bold;
+		}
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <div class="container mx-auto p-4">
+        
+        <header class="mb-4 p-4 bg-white rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-center text-blue-700">Bảng Tin Thánh Chiến</h1>
+            <div class="text-center text-lg mt-2">
+                <span class="font-semibold">Thời gian máy chủ:</span>
+                <span id="realtime-clock" class="font-mono font-bold text-gray-900">--:--:--</span>
+            </div>
+            <div class="text-center text-sm mt-1">
+                <span class="font-semibold">Trạng thái:</span>
+                <span id="refresh-status" class="font-mono text-gray-600">Đang khởi tạo...</span>
+            </div>
+        </header>
+
+        <div class="flex flex-col-reverse lg:flex-row gap-4">
+
+            <main class="w-full lg:w-2/3 space-y-4">
+                <div class="bg-white p-4 rounded-lg shadow-lg">
+                    <h2 id="contribution-title" class="text-2xl font-bold text-center mb-4">Đóng Góp Trận Hiện Tại Cho Kèo (--:00)</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        <div>
+                            <h3 class="text-xl font-semibold text-sky-600 mb-2">
+                                😇 Phe Angel
+                                <span id="angel-gems" class="linhthach"></span>
+                            </h3>
+                            <div class="font-bold mb-2">Tổng Vàng: <span id="angel-total" class="text-sky-600">0</span></div>
+                            <div class="table-container border rounded-lg">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-100 sticky top-0">
+                                        <tr>
+                                            <th class="p-2 text-left">Tên</th>
+                                            <th class="p-2 text-right">Vàng</th>
+                                            <th class="p-2 text-left">Guild</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="angel-list">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold text-red-600 mb-2">
+                                😈 Phe Devil
+                                <span id="devil-gems" class="linhthach"></span>
+                            </h3>
+                            <div class="font-bold mb-2">Tổng Vàng: <span id="devil-total" class="text-red-600">0</span></div>
+                            <div class="table-container border rounded-lg">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-100 sticky top-0">
+                                        <tr>
+                                            <th class="p-2 text-left">Tên</th>
+                                            <th class="p-2 text-right">Vàng</th>
+                                            <th class="p-2 text-left">Guild</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="devil-list">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="w-full lg:w-1/3">
+                <div class="bg-white p-4 rounded-lg shadow-lg sticky top-4">
+                    <h2 class="text-2xl font-bold text-center mb-4">Lịch Sử Thánh Chiến (24h)</h2>
+                    <div class="text-center mb-2 space-x-4">
+                        <span class="font-bold">😇 Angel: <span id="angel-wins" class="text-sky-600">0</span> thắng</span>
+                        <span class="font-bold">😈 Devil: <span id="devil-wins" class="text-red-600">0</span> thắng</span>
+                    </div>
+                    <div class="text-center mb-2 space-x-4 text-sm border-t pt-2 mt-2">
+                        <span class="font-bold">Tổng Vàng (A): <span id="angel-total-gold" class="text-sky-600">0</span></span>
+                        <span class="font-bold">Tổng Vàng (D): <span id="devil-total-gold" class="text-red-600">0</span></span>
+                    </div>
+                    <div class="table-container border rounded-lg overflow-y-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 sticky top-0">
+                                <tr>
+                                    <th class="p-2 text-left">Ngày</th>
+                                    <th class="p-2 text-left">Giờ</th>
+                                    <th class="p-2 text-left">Đội Thắng</th>
+                                    <th class="p-2 text-right">Tổng Vàng</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-list">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="mt-4 bg-white p-4 rounded-lg shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-center">Thống Kê Lịch Sử (Thu thập tự động)</h2>
+                </div>
+            <div class="max-h-[80vh] overflow-auto border rounded-lg">
+                <table class="w-full text-sm min-w-[1000px]">
+                    <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th class="p-2 text-left">STT</th>
+                            <th class="p-2 text-left">ID Trận</th>
+                            <th class="p-2 text-left">Ngày</th>
+                            <th class="p-2 text-left">Giờ</th>
+                            <th class="p-2 text-right">Vàng Tiên</th>
+                            <th class="p-2 text-right">Vàng Ma</th>
+                            <th class="p-2 text-right">LT Trừ Tiên</th>
+                            <th class="p-2 text-right">LT Trừ Ma</th>
+                            <th class="p-2 text-left">Phe Thắng</th>
+                            <th class="p-2 text-right">Vàng Thắng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statistics-list">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // =================================================================
+        // PHẦN 1: CẤU HÌNH API (CHO XEM TRỰC TIẾP)
+        // =================================================================
+        
+        const API_HISTORY_URL = "https://cmangax8.com/api/data?data=game_data"; 
+        const API_ANGEL_URL = "https://cmangax8.com/api/score_list?type=ad_angel&limit=1000"; 
+        const API_DEVIL_URL = "https://cmangax8.com/api/score_list?type=ad_devil&limit=1000";
+        const API_GEMS_URL = "https://cmangax8.com/api/ad_request_remain"; 
+
+        // === MỚI: Đường dẫn đến file data do GitHub Action tạo ra ===
+        const GITHUB_HISTORY_URL = 'history.json';
+
+        // =================================================================
+        // PHẦN 2: LOGIC XỬ LÝ (TRỰC TIẾP)
+        // =================================================================
+
+        let autoRefreshInterval = null; // Biến giữ bộ đếm 30s
+        let isRefreshing = false;       // Cờ đánh dấu trạng thái refresh
+
+        // Lấy các phần tử DOM
+        const clockElement = document.getElementById("realtime-clock");
+        const statusElement = document.getElementById("refresh-status");
+        const contributionTitle = document.getElementById("contribution-title");
+        const angelList = document.getElementById("angel-list");
+        const devilList = document.getElementById("devil-list");
+        const angelTotal = document.getElementById("angel-total");
+        const devilTotal = document.getElementById("devil-total");
+        const historyList = document.getElementById("history-list");
+        const angelWins = document.getElementById("angel-wins");
+        const devilWins = document.getElementById("devil-wins");
+        const angelGems = document.getElementById("angel-gems");
+        const devilGems = document.getElementById("devil-gems");
+        const angelTotalGold = document.getElementById("angel-total-gold");
+        const devilTotalGold = document.getElementById("devil-total-gold");
+        const statisticsList = document.getElementById("statistics-list");
+
+
+        // --- Hàm chạy khi tải trang ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // Chạy đồng hồ
+            setInterval(clockManager, 1000); 
+            
+            // Tải dữ liệu TRỰC TIẾP (cho 2 cột trên)
+            loadAllData();
+
+            // MỚI: Tải bảng thống kê từ file history.json
+            loadStatisticsTable();
+        });
+        
+        // --- Hàm tải TẤT CẢ dữ liệu (Lịch sử + Đóng góp) ---
+        function loadAllData() {
+            console.log("Đang tải lại dữ liệu trực tiếp...");
+            statusElement.textContent = "Đang tải dữ liệu trực tiếp...";
+            fetchHistory();
+            fetchContributions();
+        }
+
+        // --- Hàm tải Lịch sử (API 1) ---
+        // *** ĐÃ SỬA ĐỔI: Xóa bỏ phần gọi localStorage ***
+        async function fetchHistory() {
+            try {
+                const response = await fetch(API_HISTORY_URL); 
+                if (!response.ok) throw new Error(`Lỗi tải lịch sử: ${response.status}`);
+                
+                const data = await response.json();
+                
+                // 1. Hiển thị lịch sử (như cũ)
+                displayHistory(data.angel_devil.history); 
+
+                // 2. (ĐÃ XÓA) Không cần cập nhật localStorage nữa
+
+            } catch (error) {
+                console.error(error);
+                historyList.innerHTML = `<tr><td colspan="4" class="p-2 text-red-500 text-center">Lỗi tải lịch sử: ${error.message}</td></tr>`;
+            }
+        }
+
+        // --- Hàm tải Đóng góp (API 2 & 3 & 4) (Không thay đổi) ---
+        async function fetchContributions() {
+            console.log(`[${new Date().toLocaleTimeString()}] Đang cập nhật điểm...`);
+            statusElement.textContent = `Đang cập nhật điểm... (${new Date().toLocaleTimeString()})`;
+            
+            try {
+                const [angelResponse, devilResponse, gemsResponse] = await Promise.all([
+                    fetch(API_ANGEL_URL),
+                    fetch(API_DEVIL_URL),
+                    fetch(API_GEMS_URL)
+                ]);
+
+                if (!angelResponse.ok) throw new Error(`Lỗi tải Angel: ${angelResponse.status}`);
+                if (!devilResponse.ok) throw new Error(`Lỗi tải Devil: ${devilResponse.status}`);
+                if (!gemsResponse.ok) throw new Error(`Lỗi tải Gems: ${gemsResponse.status}`); 
+
+                const angelData = await angelResponse.json();
+                const devilData = await devilResponse.json();
+                const gemsData = await gemsResponse.json(); 
+
+                displayContributions(angelData, devilData, gemsData); 
+                statusElement.textContent = `Cập nhật lần cuối lúc: ${new Date().toLocaleTimeString()}`;
+            } catch (error)
+            {
+                console.error(error);
+                statusElement.textContent = `Lỗi cập nhật: ${error.message}`;
+            }
+        }
+        
+        // --- Hàm hiển thị Lịch sử (Không thay đổi) ---
+        function displayHistory(historyData) {
+            historyList.innerHTML = "";
+            let angelWinCount = 0;
+            let devilWinCount = 0;
+            let totalAngelGold = 0;
+            let totalDevilGold = 0;
+
+            const processedHistory = Object.keys(historyData).map(hourKey => {
+                const match = historyData[hourKey];
+                return {
+                    hour: hourKey,
+                    team: match.team,
+                    total: match.total,
+                    time: new Date(match.time) 
+                };
+            });
+
+            processedHistory.sort((a, b) => b.time - a.time);
+
+            processedHistory.forEach(match => {
+                const row = document.createElement("tr");
+                let teamClass = "";
+                let teamIcon = "";
+
+                if (match.team === "angel") {
+                    teamClass = "text-sky-600";
+                    teamIcon = "😇";
+                    angelWinCount++;
+                    totalAngelGold += match.total;
+                } else {
+                    teamClass = "text-red-600";
+                    teamIcon = "😈";
+                    devilWinCount++;
+                    totalDevilGold += match.total;
+                }
+
+                const matchDate = match.time;
+                const dateString = `${String(matchDate.getDate()).padStart(2, '0')}/${String(matchDate.getMonth() + 1).padStart(2, '0')}`;
+                const hourString = `${String(matchDate.getHours()).padStart(2, '0')}:00`;
+
+                row.innerHTML = `
+                    <td class="p-2 font-mono">${dateString}</td>
+                    <td class="p-2 font-mono">${hourString}</td>
+                    <td class="p-2 font-bold ${teamClass}">${teamIcon} ${match.team}</td>
+                    <td class="p-2 text-right font-mono">${formatNumber(match.total)}</td>
+                `;
+                historyList.appendChild(row);
+            });
+
+            angelWins.textContent = angelWinCount;
+            devilWins.textContent = devilWinCount;
+            angelTotalGold.textContent = formatNumber(totalAngelGold);
+            devilTotalGold.textContent = formatNumber(totalDevilGold);
+        }
+
+        // --- Hàm hiển thị Đóng góp (Không thay đổi) ---
+        function displayContributions(angelData, devilData, gemsData) {
+            
+            if (gemsData && gemsData.devil > 0) {
+                angelGems.textContent = `-${formatNumber(gemsData.devil)} linh thạch`;
+                devilGems.textContent = `0 linh thạch`;
+            } else if (gemsData && gemsData.angel > 0) {
+                angelGems.textContent = `0 linh thạch`;
+                devilGems.textContent = `-${formatNumber(gemsData.angel)} linh thạch`;
+            } else {
+                angelGems.textContent = `0 linh thạch`;
+                devilGems.textContent = `0 linh thạch`;
+            }
+
+            // 1. Xử lý phe Angel
+            let totalAngelScore = 0;
+            angelList.innerHTML = "";
+            const processedAngel = processContributionList(angelData);
+            processedAngel.forEach((item, index) => {
+                totalAngelScore += item.score;
+                const row = document.createElement("tr");
+                row.className = getTopClass(index);
+                row.innerHTML = `
+                    <td class="p-2">${item.name}</td>
+                    <td class="p-2 text-right">${formatNumber(item.score)}</td>
+                    <td class="p-2">${item.guild}</td>
+                `;
+                angelList.appendChild(row);
+            });
+            angelTotal.textContent = formatNumber(totalAngelScore)+" Vàng";
+
+            // 2. Xử lý phe Devil
+            let totalDevilScore = 0;
+            devilList.innerHTML = "";
+            const processedDevil = processContributionList(devilData);
+            processedDevil.forEach((item, index) => {
+                totalDevilScore += item.score;
+                const row = document.createElement("tr");
+                row.className = getTopClass(index);
+                row.innerHTML = `
+                    <td class="p-2">${item.name}</td>
+                    <td class="p-2 text-right">${formatNumber(item.score)}</td>
+                    <td class="p-2">${item.guild}</td>
+                `;
+                devilList.appendChild(row);
+            });
+            devilTotal.textContent = formatNumber(totalDevilScore)+" Vàng";
+        }
+        
+        // --- Hàm phụ: "Làm phẳng" và sắp xếp danh sách đóng góp (Không thay đổi) ---
+        function processContributionList(data) {
+            if (!Array.isArray(data)) {
+                console.error("Dữ liệu đóng góp không phải là mảng:", data);
+                return [];
+            }
+            return data.map(item => {
+                const info = JSON.parse(item.info);
+                return {
+                    name: info.name,
+                    score: parseInt(item.score, 10),
+                    guild: info.guild ? info.guild.name : "N/A"
+                };
+            }).sort((a, b) => b.score - a.score); 
+        }
+
+        // --- Hàm phụ: Lấy class CSS cho Top 3 (Không thay đổi) ---
+        function getTopClass(index) {
+            if (index === 0) return 'top-1';
+            if (index === 1) return 'top-2';
+            if (index === 2) return 'top-3';
+            return '';
+        }
+
+        // --- Hàm phụ: Định dạng số (Không thay đổi) ---
+        function formatNumber(num) {
+            if (typeof num !== 'number') return num; 
+            return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+        }
+
+        // =================================================================
+        // PHẦN 3: ĐỒNG HỒ HẸN GIỜ
+        // *** ĐÃ SỬA ĐỔI: Xóa bỏ logic lưu trữ lúc 59:35 ***
+        // =================================================================
+        function clockManager() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            // Cập nhật đồng hồ
+            clockElement.textContent = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            // Cập nhật tiêu đề trận
+            const nextHour = String((now.getHours() + 1) % 24).padStart(2, '0');
+            contributionTitle.textContent = `Đóng Góp Trận Hiện Tại (${nextHour}:00)`;
+            
+            // --- Logic Tự động Refresh ---
+
+            // 1. Kích hoạt khi đến xx:55:00 (Giữ nguyên)
+            if (minutes >= 55 && !isRefreshing) {
+                console.log("!!! ĐÃ ĐẾN 55p. BẮT ĐẦU REFRESH 30s/LẦN !!!");
+                isRefreshing = true;
+                
+                fetchContributions(); 
+                autoRefreshInterval = setInterval(fetchContributions, 30000); 
+                
+                statusElement.textContent = "ĐANG CẬP NHẬT LIÊN TỤC (30s/lần)";
+            }
+
+            // 2. (ĐÃ XÓA) Logic lưu dữ liệu lúc 59:35
+
+            // 3. Tắt khi qua giờ mới (xx:00:30)
+            // *** ĐÃ SỬA ĐỔI: Xóa cờ 'hasSavedThisHour' ***
+            if (minutes === 0 && seconds >= 30 && isRefreshing) {
+                console.log("!!! ĐÃ QUA GIỜ MỚI. DỪNG REFRESH 30s. TẢI LẠI TẤT CẢ !!!");
+                
+                isRefreshing = false;
+                clearInterval(autoRefreshInterval); 
+                
+                // Tải lại tất cả (quan trọng: để cập nhật LỊCH SỬ)
+                loadAllData();
+                
+                // MỚI: Tải lại bảng thống kê để lấy dữ liệu mới nhất
+                loadStatisticsTable();
+            }
+        }
+
+        // =================================================================
+        // PHẦN 4: HÀM MỚI (ĐỌC TỪ GITHUB)
+        // =================================================================
+
+        /**
+         * MỚI: Tải và hiển thị bảng thống kê từ file `history.json` trên GitHub.
+         */
+        async function loadStatisticsTable() {
+            console.log("Đang tải bảng thống kê từ file history.json...");
+            statisticsList.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-gray-500">Đang tải dữ liệu...</td></tr>`;
+
+            try {
+                // Thêm cache-busting query string để luôn lấy file mới nhất
+                const response = await fetch(`${GITHUB_HISTORY_URL}?t=${new Date().getTime()}`);
+                if (!response.ok) {
+                    throw new Error(`Lỗi tải file ${GITHUB_HISTORY_URL}: ${response.statusText}`);
+                }
+                
+                const storedHistory = await response.json();
+                
+                // Dữ liệu đã được sắp xếp bởi script, nhưng ta cứ sắp xếp lại
+                storedHistory.sort((a, b) => b.STT - a.STT);
+
+                statisticsList.innerHTML = ""; // Xóa dòng "Đang tải"
+
+                if (storedHistory.length === 0) {
+                    statisticsList.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-gray-500">Chưa có dữ liệu nào được thu thập.</td></tr>`;
+                    return;
+                }
+
+                storedHistory.forEach(rec => {
+                    const row = document.createElement("tr");
+                    const winnerClass = rec.PheChienThang === 'angel' ? 'text-sky-600' : (rec.PheChienThang === 'devil' ? 'text-red-600' : '');
+                    
+                    row.innerHTML = `
+                        <td class="p-2 font-mono">${rec.STT}</td>
+                        <td class="p-2 font-mono">${rec.ID_Battle}</td>
+                        <td class="p-2 font-mono">${rec.Ngay}</td>
+                        <td class="p-2 font-mono">${rec.Gio}</td>
+                        <td class="p-2 text-right font-mono text-sky-600">${formatNumber(rec.TongVangTien)}</td>
+                        <td class="p-2 text-right font-mono text-red-600">${formatNumber(rec.TongVangMa)}</td>
+                        <td class="p-2 text-right font-mono linhthach">-${formatNumber(rec.LinhThachTien)}</td>
+                        <td class="p-2 text-right font-mono linhthach">-${formatNumber(rec.LinhThachMa)}</td>
+                        <td class="p-2 font-bold ${winnerClass}">${rec.PheChienThang || 'Chưa có'}</td>
+                        <td class="p-2 text-right font-mono font-bold ${winnerClass}">${rec.TongVangThang > 0 ? formatNumber(rec.TongVangThang) : 'N/A'}</td>
+                    `;
+                    statisticsList.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("Lỗi khi tải bảng thống kê:", error);
+                statisticsList.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-red-500">Lỗi tải file thống kê: ${error.message}</td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>
