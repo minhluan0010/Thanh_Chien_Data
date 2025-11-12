@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm' # Lưu cache lại cho nhanh
+          # cache: 'npm' # Lưu cache lại cho nhanh
 
       # Bước 3: Cài đặt thư viện (chạy npm install)
       - name: Install dependencies
