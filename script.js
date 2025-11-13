@@ -138,40 +138,46 @@ async function updateResultsFromApi(storedHistory) {
  */
 async function addNewBattleRecord(storedHistory) {
     console.log("Đang gọi 3 API (Angel, Devil, Gems) để lấy dự báo trận mới...");
+    
+    // 1. Gọi 3 API cùng lúc
+    const [angelData, devilData, gemsData] = await Promise.all([
+        fetchApi(API_ANGEL_URL),
+        fetchApi(API_DEVIL_URL),
+        fetchApi(API_GEMS_URL)
+    ]);
 
-    // ... (phần gọi API giữ nguyên)
-    // ... (Đảm bảo bạn giữ lại phần gọi 3 API ở trên)
+    // Nếu 1 trong 3 API lỗi, dừng lại
+    if (!angelData || !devilData || !gemsData) {
+        console.error("Lỗi khi gọi 1 trong 3 API, không thể thêm bản ghi mới.");
+        return;
+    }
 
-    // 3. Chuẩn bị dữ liệu để lưu (cho GIỜ TIẾP THEO)
+    // 2. TÍNH TỔNG ĐIỂM (Phần bị thiếu gây ra lỗi ReferenceError)
+    const totalAngelScore = processContributionList(angelData).reduce((sum, item) => sum + item.score, 0);
+    const totalDevilScore = processContributionList(devilData).reduce((sum, item) => sum + item.score, 0);
 
-    // --- BẮT ĐẦU SỬA MÚI GIỜ ---
-
-    // 1. Lấy giờ UTC hiện tại (ví dụ: 12:59 UTC)
+    // 3. Xử lý thời gian (Đã chỉnh Múi giờ GMT+7)
     const now = new Date();
+    
+    // Cộng 7 giờ (GMT+7)
+    const battleTime = new Date(now.getTime() + (3600 * 1000 * 7)); 
+    
+    // Cộng thêm 1 giờ cho trận tiếp theo và làm tròn
+    battleTime.setUTCHours(battleTime.getUTCHours() + 1); 
+    battleTime.setUTCMinutes(0, 0, 0); 
 
-    // 2. Tạo đối tượng Date mới đã được điều chỉnh sang GMT+7
-    // (ví dụ: 12:59 UTC -> 19:59 GMT+7)
-    const battleTime = new Date(now.getTime() + (3600 * 1000 * 7)); // +7 giờ
-
-    // 3. Tính toán trận tiếp theo (ví dụ: 19:59 GMT+7 -> 20:00 GMT+7)
-    battleTime.setUTCHours(battleTime.getUTCHours() + 1); // +1 giờ
-    battleTime.setUTCMinutes(0, 0, 0); // Làm tròn 20:00:00
-
-    // 4. Lấy các thành phần GIỜ, NGÀY (theo giờ UTC, nhưng đã được điều chỉnh)
-    // Ví dụ: Lấy giờ của 20:00:00 (đã điều chỉnh)
-    const battleHour = battleTime.getUTCHours(); // Sẽ là 20
+    // Lấy thông tin ngày giờ
+    const battleHour = battleTime.getUTCHours();
     const battleDate = `${String(battleTime.getUTCDate()).padStart(2, '0')}/${String(battleTime.getUTCMonth() + 1).padStart(2, '0')}`;
-
-    // Tạo ID Trận (ví dụ: ..._20)
+    
+    // Tạo ID Trận (ví dụ: ..._09, ..._10)
     const ID_Battle = `${battleTime.getUTCFullYear()}${String(battleTime.getUTCMonth() + 1).padStart(2, '0')}${String(battleTime.getUTCDate()).padStart(2, '0')}_${String(battleHour).padStart(2, '0')}`;
-
-    // --- KẾT THÚC SỬA MÚI GIỜ ---
 
     // 4. Kiểm tra xem ID_Battle đã tồn tại chưa
     const existingRecord = storedHistory.find(rec => rec.ID_Battle === ID_Battle);
     if (existingRecord) {
         console.log(`Trận ${ID_Battle} đã tồn tại trong file. Bỏ qua.`);
-        return; // Đã tồn tại, không làm gì
+        return; 
     }
 
     // 5. Tạo bản ghi mới
@@ -180,12 +186,12 @@ async function addNewBattleRecord(storedHistory) {
         ID_Battle: ID_Battle,
         Ngay: battleDate,
         Gio: `${String(battleHour).padStart(2, '0')}:00`,
-        TongVangTien: totalAngelScore,
-        TongVangMa: totalDevilScore,
-        LinhThachTien: gemsData.devil || 0, // LT trừ Tiên
-        LinhThachMa: gemsData.angel || 0,   // LT trừ Ma
-        PheChienThang: "", // Sẽ được cập nhật ở lần chạy sau
-        TongVangThang: 0   // Sẽ được cập nhật ở lần chạy sau
+        TongVangTien: totalAngelScore, // Biến này giờ đã được định nghĩa ở bước 2
+        TongVangMa: totalDevilScore,   // Biến này giờ đã được định nghĩa ở bước 2
+        LinhThachTien: gemsData.devil || 0, 
+        LinhThachMa: gemsData.angel || 0,   
+        PheChienThang: "", 
+        TongVangThang: 0   
     };
 
     // 6. Thêm vào mảng
