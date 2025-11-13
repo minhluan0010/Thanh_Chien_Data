@@ -5,7 +5,7 @@ on:
   schedule:
     # Chạy vào phút 59 mỗi giờ
     # (Ví dụ: 09:59, 10:59, 11:59...)
-    - cron: '58 * * * *'
+    - cron: '57 * * * *'
 
 jobs:
   build:
