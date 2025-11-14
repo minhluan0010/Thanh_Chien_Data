@@ -1,5 +1,17 @@
 [
   {
+    "STT": 7,
+    "ID_Battle": "20251114_23",
+    "Ngay": "14/11",
+    "Gio": "23:00",
+    "TongVangTien": 10003,
+    "TongVangMa": 110070,
+    "LinhThachTien": 27,
+    "LinhThachMa": 0,
+    "PheChienThang": "",
+    "TongVangThang": 0
+  },
+  {
     "STT": 6,
     "ID_Battle": "20251114_22",
     "Ngay": "14/11",
@@ -8,8 +20,8 @@
     "TongVangMa": 2094001,
     "LinhThachTien": 0,
     "LinhThachMa": 120,
-    "PheChienThang": "",
-    "TongVangThang": 0
+    "PheChienThang": "angel",
+    "TongVangThang": 300289
   },
   {
     "STT": 5,
